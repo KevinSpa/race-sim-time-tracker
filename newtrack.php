@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     try {
                         log_error("Preparing database insertion");
                         // Prepare a PDO statement to insert the new track into the database
-                        $stmt = $pdo->prepare("INSERT INTO Tracks (Name, Country, Image, Length) VALUES (:name, :country, :image, :length)");
+                        $stmt = $pdo->prepare("INSERT INTO tracks (Name, Country, Image, Length) VALUES (:name, :country, :image, :length)");
                         $stmt->bindParam(":name", $name);
                         $stmt->bindParam(":country", $country);
                         $stmt->bindParam(":image", $image_name);
