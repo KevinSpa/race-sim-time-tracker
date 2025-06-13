@@ -159,9 +159,9 @@ form {
   padding: 20px;
   background-color: var(--form-background);
   border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 20px 0px var(--base-green);
-  -moz-box-shadow: 0px 0px 20px 0px var(--base-green);
-  box-shadow: 0px 0px 20px 0px var(--base-green);
+  /* -webkit-box-shadow: 0px 0px 20px 0px var(--base-green); */
+  /* -moz-box-shadow: 0px 0px 20px 0px var(--base-green); */
+  /* box-shadow: 0px 0px 20px 0px var(--base-green); */
 }
 
 label {
