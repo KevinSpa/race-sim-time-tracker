@@ -24,7 +24,6 @@ if (!$row) {
 $carName = $row['Name'];
 $carBrand = getBrandName($pdo, $row["Brand"]);
 $carImage = $row['Image'];
-$carYear = $row['Year'];
 $carTopSpeed = getCarTopSpeed($pdo, $carID);
 
 function getTrackID($pdo, $trackName) {

@@ -650,3 +650,50 @@ input[type=password] {
   }
 }
 
+
+.leaderboard-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-border);
+  padding: 1rem;
+  margin-bottom: 8px;
+  border-radius: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.leaderboard-entry:hover {
+  transform: scale(1.01);
+  border: 1px solid var(--base-red);
+}
+
+.leaderboard-entry.first-place {
+  background-color: var(--rank-first); /* goudachtig donker */
+}
+.leaderboard-entry.second-place {
+  background-color: var(--rank-second); /* grijs */
+}
+.leaderboard-entry.third-place {
+  background-color: var(--rank-third); /* bronsachtig */
+}
+
+.leaderboard-entry .stat {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--base-white);
+}
+
+
+.rank-circle {
+  width: 32px;
+  height: 32px;
+  background-color: #44444479;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+}
+

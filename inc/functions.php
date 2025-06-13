@@ -270,7 +270,7 @@ function getCarTopSpeed($pdo, $carID) {
     $stmt->execute();
     $row = $stmt->fetchAll();
     if (count($row) == 0) {
-        return "<span class='text-warning'><b>No topspeed submitted yet!</b></span>";
+        return "<span class=''>---</span>";
     } else {
         return "<span class='stat'>". $row[0]["speed"]. " </span>km/h";
     }
