@@ -3,13 +3,17 @@
 if ((int)$_SESSION["user_id"] == 1) {
 ?>
 
+<?php
+$selectedCarID = isset($_GET['car']) ? intval($_GET['car']) : null;
+$selectedTrackID = isset($_GET['track']) ? intval($_GET['track']) : null;
+?>
 <form method="post" action="">
     <div class="row justify-content-between">
         <div class="col-12 col-md-5">
-            <?php pickCar(1,$pdo); ?>
+            <?php pickCar(1, $pdo, $selectedCarID); ?>
         </div>
         <div class="col-12 col-md-5">
-            <?php pickTrack($pdo); ?>
+            <?php pickTrack($pdo, $selectedTrackID); ?>
         </div>
     </div>
 
@@ -96,6 +100,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }?>
 </div>
 </form>
+
+<script>
+function updateCarImage(id) {
+    var select = document.getElementById('cars' + id);
+    var img = select.options[select.selectedIndex].getAttribute('data-img');
+    document.getElementById('carImage' + id).innerHTML = "<img src='uploads/cars/" + img + "' alt='' style='max-width:120px;'>";
+}
+function updateTrackImage() {
+    var select = document.getElementById('tracks');
+    var img = select.options[select.selectedIndex].getAttribute('data-img');
+    document.getElementById('trackImage').innerHTML = "<img src='uploads/tracks/" + img + "' alt='' style='max-width:120px;'>";
+}
+</script>
 
 <?php
     require_once("inc/footer.php");

@@ -34,7 +34,7 @@ function getTrackID($pdo, $trackName) {
 }
 
 
-$getTimes = $pdo->prepare("SELECT t.LapTime, t.SubmittedDate, tr.ID as TrackID, tr.Name AS TrackName 
+$getTimes = $pdo->prepare("SELECT t.LapTime, t.SubmittedDate, tr.ID as TrackID, tr.Name AS TrackName, tr.Image AS TrackImage
                            FROM times t 
                            JOIN tracks tr ON t.TrackID = tr.ID 
                            WHERE t.CarID = ? 
@@ -70,19 +70,30 @@ $totalLaps = count($lapTimes);
     <div class="col-lg-8">
         <div class="card text-light h-100">
             <div class="card-body">
-                <h3 class="mb-3 fw-bold">Lap Times</h3>
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-md-6">
+                        <h3 class="mb-3 fw-bold">Lap Times</h3>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="newtime.php?car=<?= $carID ?>" class="btn btn-red mb-3">+ Submit time</a>
+                    </div>
+                </div>
+                
                 <p class="mb-4 fs-14 card-subtitle">All lap times for this car</p>
                 <?php if ($lapTimes): ?>
                     <?php foreach ($lapTimes as $time): ?>
                         <a href="tracks?track=<?= $time['TrackID'] ?>" class="text-decoration-none text-light">
                             <div class="border-bottom py-2 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <img src="uploads/tracks/<?= htmlspecialchars($time['TrackImage']) ?>" alt="<?= htmlspecialchars($time['TrackName']) ?>" class="me-3" style="max-width:100px; max-height:48px; object-fit:contain; border-radius:8px;">
                                     <div>
                                         <strong><?= $time['TrackName'] ?></strong><br>
                                         <small><?= $time['SubmittedDate'] ?></small>
                                     </div>
-                                    <div class="text-end">
-                                        <span class="stat"><?= formatTime($time['LapTime']) ?></span>
-                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="stat text-white"><?= formatTime($time['LapTime']) ?></span>
+                                </div>
                             </div>
                         </a>
                     <?php endforeach; ?>

@@ -128,53 +128,63 @@ function trackError($error)
     return $error;
 }
 
-function pickCar($id, $pdo)
+function pickCar($id, $pdo, $selectedCarID = null)
 {
-    // Get all cars from the database
     $stmt = $pdo->query("SELECT * FROM `cars` ORDER BY `Brand`");
     $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo "<label for='car_id'>Car {$id}:</label>
-    <select name='car_id{$id}' id='cars{$id}' onchange='getCar({$id})' class='form-select'>";
+    <select name='car_id{$id}' id='cars{$id}' onchange='updateCarImage({$id})' class='form-select'>";
     foreach ($cars as $car) {
         $stmtID = $car['ID'];
         $stmtImage = $car['Image'];
         $stmtBrand = getBrandName($pdo, $car['Brand']);
         $stmtName = $car['Name'];
-        echo "<option value='{$stmtID}_{$stmtImage}'>{$stmtBrand} {$stmtName}</option>";
+        $selected = ($selectedCarID == $stmtID) ? "selected" : "";
+        echo "<option value='{$stmtID}' data-img='{$stmtImage}' $selected>{$stmtBrand} {$stmtName}</option>";
     }
     echo "</select>";
-
-    // Get the image from the first car in the database
-    $setCarimg = $pdo->prepare("SELECT `Image` FROM `cars` ORDER BY `Brand` LIMIT 1");
-    $setCarimg->execute();
-    $setCarimg->bindColumn("Image", $firstCar);
-    $setCarimg->fetch();
-    echo "<p><img id='displayCar{$id}' class='preview' src='uploads/cars/{$firstCar}'></p>";
+    // Toon de afbeelding
+    $defaultImage = '';
+    foreach ($cars as $car) {
+        if ($selectedCarID == $car['ID']) {
+            $defaultImage = $car['Image'];
+            break;
+        }
+    }
+    if (!$defaultImage && count($cars) > 0) {
+        $defaultImage = $cars[0]['Image'];
+    }
+    echo "<div id='carImage{$id}' class='mt-2'><img src='uploads/cars/{$defaultImage}' alt='' class='preview'></div>";
 }
 
-function pickTrack($pdo)
+function pickTrack($pdo, $selectedTrackID = null)
 {
-    // Get all tracks from the database
     $stmt = $pdo->query('SELECT * FROM tracks ORDER BY times_submitted DESC ');
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo "<label for='track_id'>Track:</label>
-        <select name='track_id' id='tracks' onchange='getTrack()' class='form-select'>";
+        <select name='track_id' id='tracks' onchange='updateTrackImage()' class='form-select'>";
     foreach ($tracks as $track) {
         $stmtID = $track['ID'];
         $stmtImage = $track['Image'];
         $stmtName = $track['Name'];
-        echo "<option value='{$stmtID}_{$stmtImage}'>{$stmtName}</option>";
+        $selected = ($selectedTrackID == $stmtID) ? "selected" : "";
+        echo "<option value='{$stmtID}' data-img='{$stmtImage}' $selected>{$stmtName}</option>";
     }
     echo "</select>";
-
-    $setTrackimg = $pdo->prepare("SELECT `Image` FROM `tracks` ORDER BY times_submitted DESC LIMIT 1");
-    $setTrackimg->execute();
-    $setTrackimg->bindColumn("Image", $firstTrack);
-    $setTrackimg->fetch();
-
-    echo "<p><img id='displayTrack' class='preview' src='uploads/tracks/{$firstTrack}'></p>";
+    // Toon de afbeelding
+    $defaultImage = '';
+    foreach ($tracks as $track) {
+        if ($selectedTrackID == $track['ID']) {
+            $defaultImage = $track['Image'];
+            break;
+        }
+    }
+    if (!$defaultImage && count($tracks) > 0) {
+        $defaultImage = $tracks[0]['Image'];
+    }
+    echo "<div id='trackImage' class='mt-2'><img src='uploads/tracks/{$defaultImage}' alt='' class='preview'></div>";
 }
 
 function brandList($pdo) {

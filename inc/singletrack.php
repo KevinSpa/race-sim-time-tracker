@@ -77,7 +77,15 @@ $totalDistance = $totalUnique * $row['Length'] / 1000;
     <div class="col-lg-8">
         <div class="card text-light h-100">
             <div class="card-body">
-                <h3 class="mb-3 fw-bold">Lap Times</h3>
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-md-6">
+                        <h3 class="mb-3 fw-bold">Lap Times</h3>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="newtime.php?track=<?= $trackID ?>" class="btn btn-red mb-3">+ Submit time</a>
+                    </div>
+                </div>
+                
                 <p class="mb-4 fs-14 card-subtitle">Fastest lap per car on this track</p>
                 <?php if ($times): ?>
                     <?php 
