@@ -105,12 +105,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 function updateCarImage(id) {
     var select = document.getElementById('cars' + id);
     var img = select.options[select.selectedIndex].getAttribute('data-img');
-    document.getElementById('carImage' + id).innerHTML = "<img src='uploads/cars/" + img + "' alt='' style='max-width:120px;'>";
+    document.getElementById('carImage' + id).innerHTML = "<img src='uploads/cars/" + img + "' alt='' class='preview'>";
 }
 function updateTrackImage() {
     var select = document.getElementById('tracks');
     var img = select.options[select.selectedIndex].getAttribute('data-img');
-    document.getElementById('trackImage').innerHTML = "<img src='uploads/tracks/" + img + "' alt='' style='max-width:120px;'>";
+    document.getElementById('trackImage').innerHTML = "<img src='uploads/tracks/" + img + "' alt='' class='preview'>";
 }
 </script>
 
