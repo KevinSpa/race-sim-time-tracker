@@ -1,5 +1,8 @@
-<?php require_once("inc/header.php");
+<?php require_once("inc/header.php"); ?>
 
+<?php displaySuccessMessage('car'); ?>
+
+<?php
 if (isset($_GET['car'])) {
     include_once("inc/singlecar.php");
 } else {
@@ -12,7 +15,7 @@ if (isset($_GET['car'])) {
             </div>
         </div>';
 
-    $stmt = $pdo->prepare("SELECT * FROM cars ORDER BY times_submitted DESC");
+    $stmt = $pdo->prepare("SELECT * FROM cars WHERE DeletedDate IS NULL ORDER BY times_submitted DESC");
     $stmt->execute();
     $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

@@ -81,4 +81,5 @@ require_once("functions.php");
 </nav>
 
 <div class="container pt-5 main-content">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

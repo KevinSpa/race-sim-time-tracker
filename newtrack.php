@@ -19,22 +19,54 @@ if (isset($_GET['error'])) {
 
 if ((int)$_SESSION["user_id"] == 1) {
     ?>
-    <form method="post" action="" enctype="multipart/form-data" id="uploadTrack">
-        <label for="name">Track Name:</label>
-        <input type="text" id="name" name="name" required>
+    <form method="post" action="" enctype="multipart/form-data" id="uploadTrack" class="card p-4 mb-4">
+        <h2 class="mb-3">Add New Track</h2>
+        
+        <div class="mb-3">
+            <label for="name" class="form-label">Track Name:</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
 
-        <label for="country">Country:</label>
-        <input type="text" id="country" name="country" required>
+        <div class="mb-3">
+            <label for="country" class="form-label">Country:</label>
+            <input type="text" id="country" name="country" class="form-control" required>
+        </div>
 
-        <label for="length">Length in Meters:</label>
-        <input type="number" id="length" name="length" required>
+        <div class="mb-3">
+            <label for="length" class="form-label">Length in Meters:</label>
+            <input type="number" id="length" name="length" class="form-control" required>
+        </div>
 
-        <label for="image">Image:</label>
-        <input type="file" id="imageInput" onchange="previewImage(event)" name="image" accept="image/*" required>
-        <img id="preview" src="#" alt="Preview Image" class="w-100">
-        <br><br>
-        <input type="submit" value="Submit">
+        <div class="mb-3">
+            <label for="imageInput" class="form-label">Image:</label>
+            <input type="file" id="imageInput" onchange="previewImage(event)" name="image" accept="image/*" class="form-control" required>
+            <div class="mt-3">
+                <img id="preview" src="#" alt="Preview Image" class="img-fluid" style="max-width: 300px; display: none;">
+            </div>
+        </div>
+        
+        <div>
+            <input type="submit" value="Create Track" class="btn btn-primary">
+        </div>
     </form>
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('preview');
+            const file = event.target.files[0];
+            
+            if (file) {
+                preview.style.display = 'block';
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    </script>
 
     <?php
 }

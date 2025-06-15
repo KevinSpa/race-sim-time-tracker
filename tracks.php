@@ -1,5 +1,8 @@
-<?php require_once("inc/header.php");
+<?php require_once("inc/header.php"); ?>
 
+<?php displaySuccessMessage('track'); ?>
+
+<?php
 // Display single track stats when set
 if (isset($_GET['track'])) {
     include_once("inc/singletrack.php");
@@ -12,7 +15,7 @@ if (isset($_GET['track'])) {
                 <a href="newtrack" class="btn btn-red">+ Add Track</a>
             </div>
         </div>';
-    $stmt = $pdo->prepare("SELECT * FROM tracks ORDER BY times_submitted DESC");
+    $stmt = $pdo->prepare("SELECT * FROM tracks WHERE DeletedDate IS NULL ORDER BY times_submitted DESC");
     $stmt->execute();
 
     // Fetch all results as an associative array

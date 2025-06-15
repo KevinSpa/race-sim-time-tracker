@@ -38,7 +38,7 @@ $stmt = $pdo->prepare(" SELECT t1.CarID,
                             GROUP BY CarID
                         ) t2 ON t1.CarID = t2.CarID AND t1.LapTime = t2.FastestTime
                         JOIN cars c ON t1.CarID = c.ID
-                        WHERE t1.TrackID = ?
+                        WHERE t1.TrackID = ? AND c.DeletedDate IS NULL
                         ORDER BY t1.LapTime ASC"
                     );
 $stmt->bindParam(1, $trackID);
@@ -50,6 +50,18 @@ $times = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $totalUnique = $stmt->rowCount();
 $totalSubmitted = isset($_GET['sub']) ? $_GET['sub'] : $totalUnique;
 $totalDistance = $totalUnique * $row['Length'] / 1000;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_track']) && (int)$_SESSION["user_id"] == 1) {
+    $stmt = $pdo->prepare("UPDATE tracks SET DeletedDate = NOW() WHERE ID = ?");
+    $stmt->execute([$trackID]);
+    header("Location: tracks.php?deleted=success");
+    exit();
+}
+
+if ($row['DeletedDate']) {
+    echo "<div class='alert alert-danger'>Deze track is verwijderd.</div>";
+    exit;
+}
 ?>
 
 <div class="row g-4">
@@ -69,6 +81,12 @@ $totalDistance = $totalUnique * $row['Length'] / 1000;
                     <p><?= $totalUnique ?></p>
                     <span class="card-subtitle fs-14">Total distance driven</span>
                     <p><?= $totalDistance ?> km</p>
+                    <?php if ((int)$_SESSION["user_id"] == 1 && !$row['DeletedDate']): ?>
+                        <button id="deleteTrackBtn" class="btn btn-danger mt-2">Delete Track</button>
+                        <form id="deleteTrackForm" method="post" action="" style="display:none;">
+                            <input type="hidden" name="delete_track" value="1">
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -125,3 +143,22 @@ $totalDistance = $totalUnique * $row['Length'] / 1000;
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('deleteTrackBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This track will be marked as deleted and hidden everywhere.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteTrackForm').submit();
+        }
+    })
+});
+</script>

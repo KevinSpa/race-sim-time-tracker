@@ -48,9 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($brandLogo["type"] == "image/png"){
             list($width, $height) = getimagesize($brandLogo["tmp_name"]);
 
-            if ($width !== 400 && $height !== 400) {
-                $errors[] = "Image resolution must bee 400x400!";
-            }
+            // if ($width !== 400 && $height !== 400) {
+            //     $errors[] = "Image resolution must bee 400x400!";
+            // }
         } else {
             $errors[] = "Image must be a .png image!";
         }

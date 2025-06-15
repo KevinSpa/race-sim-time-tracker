@@ -89,7 +89,10 @@ function formatTime($laptime)
 function getFastestTime($pdo, $trackID)
 {
     // Prepare a SQL query to find the minimum LapTime for a specific TrackID.
-    $lapTimeQuery = $pdo->prepare("SELECT MIN(LapTime) as fastest_time FROM `times` WHERE TrackID = :trackid");
+    $lapTimeQuery = $pdo->prepare("SELECT MIN(t.LapTime) as fastest_time 
+                                  FROM `times` t
+                                  JOIN cars c ON t.CarID = c.ID 
+                                  WHERE t.TrackID = :trackid AND c.DeletedDate IS NULL");
 
     $lapTimeQuery->bindParam(":trackid", $trackID);
     $lapTimeQuery->execute();
@@ -106,7 +109,7 @@ function getFastestTime($pdo, $trackID)
 
 function checkCar($pdo, $id)
 {
-    $stmt = $pdo->prepare("SELECT `ID` FROM `cars` WHERE `ID` = :carID");
+    $stmt = $pdo->prepare("SELECT `ID` FROM `cars` WHERE `ID` = :carID AND DeletedDate IS NULL");
     $stmt->bindParam(":carID", $id);
     $stmt->execute();
     $stmt->fetch();
@@ -130,7 +133,7 @@ function trackError($error)
 
 function pickCar($id, $pdo, $selectedCarID = null)
 {
-    $stmt = $pdo->query("SELECT * FROM `cars` ORDER BY `Brand`");
+    $stmt = $pdo->query("SELECT * FROM `cars` WHERE DeletedDate IS NULL ORDER BY `Brand`");
     $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo "<label for='car_id'>Car {$id}:</label>
@@ -160,7 +163,7 @@ function pickCar($id, $pdo, $selectedCarID = null)
 
 function pickTrack($pdo, $selectedTrackID = null)
 {
-    $stmt = $pdo->query('SELECT * FROM tracks ORDER BY times_submitted DESC ');
+    $stmt = $pdo->query('SELECT * FROM tracks WHERE DeletedDate IS NULL ORDER BY times_submitted DESC ');
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo "<label for='track_id'>Track:</label>
@@ -283,6 +286,34 @@ function getCarTopSpeed($pdo, $carID) {
         return "<span class=''>---</span>";
     } else {
         return "<span class='stat'>". $row[0]["speed"]. " </span>km/h";
+    }
+}
+
+function displaySuccessMessage($type) {
+    if (isset($_GET['deleted']) && $_GET['deleted'] == 'success') {
+        $message = '';
+        
+        switch($type) {
+            case 'car':
+                $message = 'The car was successfully deleted.';
+                break;
+            case 'track':
+                $message = 'The track was successfully deleted.';
+                break;
+            default:
+                $message = 'Item was successfully deleted.';
+        }
+        
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '$message',
+                    confirmButtonColor: '#3085d6'
+                });
+            });
+        </script>";
     }
 }
 ?>

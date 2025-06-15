@@ -37,14 +37,24 @@ function getTrackID($pdo, $trackName) {
 $getTimes = $pdo->prepare("SELECT t.LapTime, t.SubmittedDate, tr.ID as TrackID, tr.Name AS TrackName, tr.Image AS TrackImage
                            FROM times t 
                            JOIN tracks tr ON t.TrackID = tr.ID 
-                           WHERE t.CarID = ? 
+                           WHERE t.CarID = ? AND tr.DeletedDate IS NULL
                            ORDER BY t.LapTime ASC");
 
 $getTimes->execute([$carID]);
 $lapTimes = $getTimes->fetchAll(PDO::FETCH_ASSOC);
 $totalLaps = count($lapTimes);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_car']) && (int)$_SESSION["user_id"] == 1) {
+    $stmt = $pdo->prepare("UPDATE cars SET DeletedDate = NOW() WHERE ID = ?");
+    $stmt->execute([$carID]);
+    header("Location: cars.php?deleted=success");
+    exit();
+}
 
+if ($row['DeletedDate']) {
+    echo "<div class='alert alert-danger'>Deze auto is verwijderd.</div>";
+    exit;
+}
 ?>
 
 <div class="row g-4">
@@ -63,6 +73,30 @@ $totalLaps = count($lapTimes);
                     <span class="card-subtitle fs-14">Top Speed</span>
                     <p><?= $carTopSpeed ?></p>
                 </div>
+                <?php if ((int)$_SESSION["user_id"] == 1 && !$row['DeletedDate']): ?>
+                    <button id="deleteCarBtn" class="btn btn-danger mt-2">Delete Car</button>
+                    <form id="deleteCarForm" method="post" action="" style="display:none;">
+                        <input type="hidden" name="delete_car" value="1">
+                    </form>
+                <?php endif; ?>
+                <script>
+                document.getElementById('deleteCarBtn')?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This car will be marked as deleted and hidden everywhere.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('deleteCarForm').submit();
+                        }
+                    })
+                });
+                </script>
             </div>
         </div>
     </div>
