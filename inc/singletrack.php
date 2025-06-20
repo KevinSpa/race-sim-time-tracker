@@ -126,7 +126,7 @@ foreach ($lapHistory as $i => $entry) {
             </div>
         </div>
 
-        <div class="card text-light h-100 mt-4">
+        <div class="card text-light mt-4">
             <div class="card-body">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-md-6">
