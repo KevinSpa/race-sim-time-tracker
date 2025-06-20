@@ -62,6 +62,57 @@ if ($row['DeletedDate']) {
     echo "<div class='alert alert-danger'>Deze track is verwijderd.</div>";
     exit;
 }
+
+$lapHistoryStmt = $pdo->prepare("
+    SELECT t.LapTime, t.SubmittedDate, c.Name AS CarName
+    FROM times t
+    JOIN cars c ON t.CarID = c.ID
+    WHERE t.TrackID = ? AND c.DeletedDate IS NULL
+    ORDER BY t.SubmittedDate ASC, t.LapTime ASC
+");
+$lapHistoryStmt->execute([$trackID]);
+$lapHistory = $lapHistoryStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$chartLabels = [];
+$chartData = [];
+$chartCars = [];
+$bestTime = null;
+$lastYear = null;
+$lastBestTime = null;
+$lastBestCar = null;
+
+$yearlyBest = [];
+foreach ($lapHistory as $entry) {
+    $year = date('Y', strtotime($entry['SubmittedDate']));
+    if (!isset($yearlyBest[$year]) || $entry['LapTime'] < $yearlyBest[$year]['LapTime']) {
+        $yearlyBest[$year] = [
+            'LapTime' => $entry['LapTime'],
+            'SubmittedDate' => $entry['SubmittedDate'],
+            'CarName' => $entry['CarName']
+        ];
+    }
+}
+
+foreach ($lapHistory as $i => $entry) {
+    if ($i === 0 || $entry['LapTime'] < $bestTime) {
+        $bestTime = $entry['LapTime'];
+        $chartLabels[] = $entry['SubmittedDate'];
+        $chartData[] = $entry['LapTime'];
+        $chartCars[] = $entry['CarName'];
+        $lastYear = date('Y', strtotime($entry['SubmittedDate']));
+        $lastBestTime = $entry['LapTime'];
+        $lastBestCar = $entry['CarName'];
+    }
+}
+
+$currentYear = date('Y');
+for ($y = $lastYear + 1; $y <= $currentYear; $y++) {
+    if (isset($yearlyBest[$y])) {
+        $chartLabels[] = $yearlyBest[$y]['SubmittedDate'];
+        $chartData[] = $yearlyBest[$y]['LapTime'];
+        $chartCars[] = $yearlyBest[$y]['CarName'];
+    }
+}
 ?>
 
 <div class="row g-4">
@@ -93,7 +144,16 @@ if ($row['DeletedDate']) {
     </div>
 
     <div class="col-lg-8">
-        <div class="card text-light h-100">
+
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Lap Time Progression</h4>
+                <canvas id="lapTimeChart" height="100"></canvas>
+                <small class="text-muted">Hover over de punten voor de auto die de tijd reed.</small>
+            </div>
+        </div>
+
+        <div class="card text-light h-100 mt-4">
             <div class="card-body">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-md-6">
@@ -113,7 +173,6 @@ if ($row['DeletedDate']) {
                         $avg = round($row['Length'] / $time['LapTime'] * 3.6, 2);
                         $subDate = $time["SubmittedDate"];
 
-                        // Bepaal klasse op basis van positie
                         $placeClass = '';
                         if ($i == 1) $placeClass = 'first-place';
                         elseif ($i == 2) $placeClass = 'second-place';
@@ -143,6 +202,80 @@ if ($row['DeletedDate']) {
         </div>
     </div>
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+const ctx = document.getElementById('lapTimeChart').getContext('2d');
+const chartLabels = <?= json_encode($chartLabels) ?>;
+const chartData = <?= json_encode($chartData) ?>;
+const chartCars = <?= json_encode($chartCars) ?>;
+
+const lapTimeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: chartLabels,
+        datasets: [{
+            label: 'Lap Time (s)',
+            data: chartData,
+            fill: false,
+            borderColor: 'rgb(220,53,69)',
+            backgroundColor: 'rgba(220,53,69,0.2)',
+            tension: 0.2,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+        }]
+    },
+    options: {
+        plugins: {
+            datalabels: {
+                anchor: 'end',
+                align: 'top',
+                color: '#fff',
+                font: { weight: 'bold' },
+                formatter: function(value) {
+                    const minutes = String(Math.floor(value / 60)).padStart(2, '0');
+                    const seconds = String(Math.floor(value % 60)).padStart(2, '0');
+                    const millis = String(Math.round((value - Math.floor(value)) * 1000)).padStart(3, '0');
+                    return `${minutes}:${seconds}:${millis}`;
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const idx = context.dataIndex;
+                        const car = chartCars[idx];
+                        const value = context.parsed.y;
+                        const minutes = String(Math.floor(value / 60)).padStart(2, '0');
+                        const seconds = String(Math.floor(value % 60)).padStart(2, '0');
+                        const millis = String(Math.round((value - Math.floor(value)) * 1000)).padStart(3, '0');
+                        return `Tijd: ${minutes}:${seconds}:${millis} (${car})`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                title: { display: true, text: 'Lap Time (s)' },
+                beginAtZero: false,
+                ticks: {
+                    callback: function(value) {
+                        const minutes = String(Math.floor(value / 60)).padStart(2, '0');
+                        const seconds = String(Math.floor(value % 60)).padStart(2, '0');
+                        const millis = String(Math.round((value - Math.floor(value)) * 1000)).padStart(3, '0');
+                        return `${minutes}:${seconds}:${millis}`;
+                    }
+                }
+            },
+            x: {
+                title: { display: true, text: 'Datum' }
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+</script>
 
 <script>
 document.getElementById('deleteTrackBtn')?.addEventListener('click', function(e) {
