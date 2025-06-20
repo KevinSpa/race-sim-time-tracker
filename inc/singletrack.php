@@ -77,21 +77,6 @@ $chartLabels = [];
 $chartData = [];
 $chartCars = [];
 $bestTime = null;
-$lastYear = null;
-$lastBestTime = null;
-$lastBestCar = null;
-
-$yearlyBest = [];
-foreach ($lapHistory as $entry) {
-    $year = date('Y', strtotime($entry['SubmittedDate']));
-    if (!isset($yearlyBest[$year]) || $entry['LapTime'] < $yearlyBest[$year]['LapTime']) {
-        $yearlyBest[$year] = [
-            'LapTime' => $entry['LapTime'],
-            'SubmittedDate' => $entry['SubmittedDate'],
-            'CarName' => $entry['CarName']
-        ];
-    }
-}
 
 foreach ($lapHistory as $i => $entry) {
     if ($i === 0 || $entry['LapTime'] < $bestTime) {
@@ -99,9 +84,6 @@ foreach ($lapHistory as $i => $entry) {
         $chartLabels[] = $entry['SubmittedDate'];
         $chartData[] = $entry['LapTime'];
         $chartCars[] = $entry['CarName'];
-        $lastYear = date('Y', strtotime($entry['SubmittedDate']));
-        $lastBestTime = $entry['LapTime'];
-        $lastBestCar = $entry['CarName'];
     }
 }
 
