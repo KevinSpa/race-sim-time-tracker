@@ -86,15 +86,6 @@ foreach ($lapHistory as $i => $entry) {
         $chartCars[] = $entry['CarName'];
     }
 }
-
-$currentYear = date('Y');
-for ($y = $lastYear + 1; $y <= $currentYear; $y++) {
-    if (isset($yearlyBest[$y])) {
-        $chartLabels[] = $yearlyBest[$y]['SubmittedDate'];
-        $chartData[] = $yearlyBest[$y]['LapTime'];
-        $chartCars[] = $yearlyBest[$y]['CarName'];
-    }
-}
 ?>
 
 <div class="row g-4">
