@@ -194,7 +194,7 @@ function brandList($pdo) {
     // Get all cars from the database
     $stmt = $pdo->query("SELECT b.ID, b.Name, COUNT(c.Brand) AS brand_count
                             FROM brands b
-                            LEFT JOIN cars c ON b.ID = c.Brand
+                            LEFT JOIN cars c ON b.ID = c.Brand AND c.DeletedDate IS NULL
                             GROUP BY b.Name
                             ORDER BY brand_count DESC;");
     $brands = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -255,14 +255,19 @@ function isNumericString($str) {
 }
 
 function getHighestTopSpeed($pdo) {
-    $pos = $pdo->prepare("SELECT speed FROM topspeed ORDER BY speed DESC LIMIT 1;");
+    $pos = $pdo->prepare("SELECT speed FROM topspeed ts 
+                         JOIN cars c ON ts.carID = c.ID 
+                         WHERE c.DeletedDate IS NULL 
+                         ORDER BY speed DESC LIMIT 1;");
     $pos->execute();
     $row = $pos->fetchAll();
     return $row[0]["speed"];
 }
 
 function getAmountOfFasterCars($pdo, $time) {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM `topspeed` WHERE speed > ?; ");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM `topspeed` ts
+                          JOIN cars c ON ts.carID = c.ID 
+                          WHERE ts.speed > ? AND c.DeletedDate IS NULL;");
     $stmt->bindParam(1, $time);
     $stmt->execute();
     $row = $stmt->fetchAll();
@@ -270,7 +275,7 @@ function getAmountOfFasterCars($pdo, $time) {
 }
 
 function getCarInfo($pdo, $carID) {
-    $stmt = $pdo->prepare("SELECT * FROM cars WHERE ID = ?");
+    $stmt = $pdo->prepare("SELECT * FROM cars WHERE ID = ? AND DeletedDate IS NULL");
     $stmt->bindParam(1, $carID);
     $stmt->execute();
     $row = $stmt->fetchAll();
@@ -278,7 +283,9 @@ function getCarInfo($pdo, $carID) {
 }
 
 function getCarTopSpeed($pdo, $carID) {
-    $stmt = $pdo->prepare("SELECT speed FROM topspeed WHERE carID = ?");
+    $stmt = $pdo->prepare("SELECT speed FROM topspeed ts
+                          JOIN cars c ON ts.carID = c.ID
+                          WHERE ts.carID = ? AND c.DeletedDate IS NULL");
     $stmt->bindParam(1, $carID);
     $stmt->execute();
     $row = $stmt->fetchAll();

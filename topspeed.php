@@ -1,20 +1,29 @@
 <?php require_once("inc/header.php");
 if ((int)$_SESSION["user_id"] == 1) {
-    if ($_GET["add"] == "new") {
+    if (isset($_GET["add"]) && $_GET["add"] == "new") {
         ?>
 
-        <form method="post" action="topspeed?add=new">
-            <div class="row justify-content-between">
-                <div class="col-12 col-md-5">
-                    <?php pickCar(1, $pdo); ?>
-                </div>
-                <div class="col-12 col-md-5">
-                    <label> Top Speed:</label>
-                    <input type="text" name="topspeed" class="w-100">
-                </div>
-            </div>
-            <input type="submit" value="Submit">
-            <div class="col-12">
+        <div class="card text-light mb-4">
+            <div class="card-body">
+                <h3 class="mb-3 fw-bold">Upload New Top Speed</h3>
+                <form method="post" action="topspeed?add=new">
+                    <div class="row justify-content-between">
+                        <div class="col-12 col-md-5">
+                            <?php pickCar(1, $pdo); ?>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label>Top Speed (km/h):</label>
+                            <input type="text" name="topspeed" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <input type="submit" value="Submit Top Speed" class="btn btn-red">
+                            <a href="topspeed" class="btn btn-outline-light ms-2">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+                
                 <?php
                 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $errors = array();
@@ -38,7 +47,6 @@ if ((int)$_SESSION["user_id"] == 1) {
                         $errors[] = "Top speed can't be 0 or lower";
                     }
 
-
                     if (empty($errors)) {
                         $topspeed = str_replace(',', '.', $topspeed);
                         $currentTopSpeed = getHighestTopSpeed($pdo);
@@ -47,80 +55,98 @@ if ((int)$_SESSION["user_id"] == 1) {
                         $stmt = $pdo->prepare("INSERT INTO topspeed (speed, CarID) VALUES (?, ?)");
                         $stmt->execute([$topspeed, $car_id]);
 
-                        // Display the success message with the position in the times list
-                        echo "<hr>Top speed uploaded successfully.";
-                        echo "<br>Current highest top speed: <span class='stat'>" . $currentTopSpeed . "</span>";
-                        echo "<br>Submitted speed: <span class='stat''>" . $topspeed . "</span>";
-                        echo "<br>There are: <span class='stat'>" . getAmountOfFasterCars($pdo, $topspeed) . "</span> cars faster!<br>";
+                        echo "<div class='alert alert-success mt-3'>
+                                <h5>Top speed uploaded successfully!</h5>
+                                <p class='mb-1'><strong>Current highest top speed:</strong> <span class='stat'>" . $currentTopSpeed . " km/h</span></p>
+                                <p class='mb-1'><strong>Your submitted speed:</strong> <span class='stat'>" . $topspeed . " km/h</span></p>
+                                <p class='mb-1'><strong>Cars faster than yours:</strong> <span class='stat'>" . getAmountOfFasterCars($pdo, $topspeed) . "</span></p>";
+                        
                         if ($topspeed > $currentTopSpeed) {
-                            echo "You are <span class='stat'>+" . $currentTopSpeed - $topspeed . "</span> km/h faster than previous top speed!";
+                            echo "<p class='mb-0'>🏆 You are <span class='stat'>+" . ($topspeed - $currentTopSpeed) . " km/h</span> faster than the previous top speed!</p>";
                         } elseif ($topspeed == $currentTopSpeed) {
-                            echo "Your top speed is the same as the current top speed!";
+                            echo "<p class='mb-0'>🤝 Your top speed matches the current record!</p>";
                         } else {
-                            echo "You are <span class='stat'>" . $topspeed - $currentTopSpeed . "</span> km/h slower than current top speed!";
+                            echo "<p class='mb-0'>You are <span class='stat'>" . ($currentTopSpeed - $topspeed) . " km/h</span> slower than the current top speed.</p>";
                         }
-                        echo "<hr><br><br>";
+                        echo "</div>";
                     } else {
-                        echo "<hr>";
+                        echo "<div class='mt-3'>";
                         foreach ($errors as $error) {
                             echo "<div class='alert alert-danger'>$error</div>";
                         }
+                        echo "</div>";
                     }
                 } ?>
-                <a href="topspeed" class="mt-4 btn btn-danger">Close form</a>
             </div>
-        </form>
+        </div>
 
         <?php
     }
 }
 ?>
-<a href="?add=new" class="btn btn-green">Upload new speed!</a>
-<div class="row justify-content-between mt-2 border-bottom">
-    <div class="col-3 col-lg-1">
-        <h2>Image</h2>
+
+<div class="row justify-content-between align-items-center mb-4">
+    <div class="col-md-6">
+        <h2>Top Speed Rankings</h2>
     </div>
-    <div class="col-8 col-lg-8">
-        <h2>Car Name</h2>
-    </div>
-    <div class="col-lg-2 text-center border-left border-right">
-        <h2>Top Speed</h2>
+    <div class="col-md-6 text-end">
+        <a href="?add=new" class="btn btn-red">🔝 Upload New Speed</a>
     </div>
 </div>
 
 <?php
-$allSpeeds = $pdo->prepare("SELECT carID, MAX(speed) AS highest_speed
-                                    FROM topspeed
-                                    GROUP BY carID
-                                    ORDER BY highest_speed DESC ; ");
+$allSpeeds = $pdo->prepare("SELECT ts.carID, MAX(ts.speed) AS highest_speed
+                                    FROM topspeed ts
+                                    JOIN cars c ON ts.carID = c.ID
+                                    WHERE c.DeletedDate IS NULL
+                                    GROUP BY ts.carID
+                                    ORDER BY highest_speed DESC");
 $allSpeeds->execute();
 $row = $allSpeeds->fetchAll();
 
-$i = 0;
-foreach ($row as $speed) :
-    $i++;
-    $carInfo = getCarInfo($pdo, $speed['carID']);
-    ?>
-    <a href='cars?car=<?= $speed['CarID']?>' class='carLink'>
-        <div class="row justify-content-between trackCarList mt-2">
-            <div class="col-3 col-lg-1">
-                <img src="uploads/cars/<?php echo $carInfo[0]['Image']; ?>" alt="<?php echo $carInfo[0]['Name']; ?>" class="w-100">
-            </div>
-            <div class="col-8 col-lg-8">
-                <h2 class="preventLongText"><?php echo getBrandName($pdo, $carInfo[0]['Brand']) . " - ".$carInfo[0]['Name']; ?></h2>
-                <div class="">
-                    <div class="col-10 col-lg-5 d-flex align-items-center">
+if ($row): ?>
+    <div class="card text-light">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Fastest cars by top speed</h4>
+            <?php 
+            $i = 0;
+            foreach ($row as $speed):
+                $i++;
+                $carInfo = getCarInfo($pdo, $speed['carID']);
+                
+                // Skip if car info is empty (car was deleted)
+                if (empty($carInfo)) continue;
+                
+                $placeClass = '';
+                if ($i == 1) $placeClass = 'first-place';
+                elseif ($i == 2) $placeClass = 'second-place';
+                elseif ($i == 3) $placeClass = 'third-place';
+            ?>
+                <a href='cars?car=<?= $speed['carID']?>' class='text-decoration-none text-light topspeed-link'>
+                    <div class="leaderboard-entry d-flex align-items-center justify-content-between <?= $placeClass ?>">
+                        <div class="d-flex align-items-center">
+                            <img src="uploads/cars/<?php echo $carInfo[0]['Image']; ?>" alt="<?php echo $carInfo[0]['Name']; ?>" width="120" class="me-3">
+                            <div class="rank-circle me-3"><?= $i ?></div>
+                            <div>
+                                <div><strong><?php echo getBrandName($pdo, $carInfo[0]['Brand']) . " " . $carInfo[0]['Name']; ?></strong></div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="stat text-white fs-4"><?= $speed["highest_speed"]?> km/h</div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-lg-2 text-center border-left border-right">
-                <span class="top px-2"> <?= $speed["highest_speed"]?> km/h</span>
-            </div>
+                </a>
+            <?php endforeach; ?>
         </div>
-    </a>
-<?php
-endforeach;
+    </div>
+<?php else: ?>
+    <div class="card text-light">
+        <div class="card-body text-center">
+            <h4>No top speeds recorded yet</h4>
+            <p class="text-muted">Be the first to upload a top speed!</p>
+            <a href="?add=new" class="btn btn-red">Upload Top Speed</a>
+        </div>
+    </div>
+<?php endif; ?>
 
-require_once("inc/footer.php");
-
-?>
+<?php require_once("inc/footer.php"); ?>

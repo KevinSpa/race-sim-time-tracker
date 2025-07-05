@@ -8,8 +8,7 @@ $totalLapTimes = $pdo->query("SELECT COUNT(*) FROM times")->fetchColumn();
 
 <div class="row justify-content-between mb-3">
     <div class="col-6">
-        <img src="assets/img/home-title.png" class="home-title" alt="Title: Barrietto">
-
+        <h1 class="text-light fw-bold">Dashboard</h1>
     </div>
     <div class="col-6 text-right">
         <a href="newtime" class="btn btn-red">+ Add time</a>

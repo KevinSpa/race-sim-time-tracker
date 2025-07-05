@@ -12,12 +12,12 @@ if (!ctype_digit($trackID) || $trackID <= 0) {
 }
 
 // Check if the trackID exists
-$stmt = $pdo->prepare("SELECT * FROM `tracks` WHERE `ID` = ?");
+$stmt = $pdo->prepare("SELECT * FROM `tracks` WHERE `ID` = ? AND DeletedDate IS NULL");
 $stmt->execute([$trackID]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($stmt->rowCount() == 0) {
-    // Track ID does not exist
+    // Track ID does not exist or is deleted
     header("Location: tracks.php?track=non");
     exit;
 }

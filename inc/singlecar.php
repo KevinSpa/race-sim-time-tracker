@@ -12,7 +12,7 @@ if (!is_numeric($carID) || $carID <= 0) {
     exit();
 }
 
-$stmt = $pdo->prepare("SELECT * FROM cars WHERE ID = ?");
+$stmt = $pdo->prepare("SELECT * FROM cars WHERE ID = ? AND DeletedDate IS NULL");
 $stmt->execute([$carID]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

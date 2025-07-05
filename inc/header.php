@@ -63,6 +63,10 @@ require_once("functions.php");
             <a class="nav-link" href="times">⏱️ Lap Times</a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link" href="topspeed">🔝 Top speed</a>
+        </li>
+
         <p></p>
         <?php
         if ((int)$_SESSION["user_id"] == 1) {

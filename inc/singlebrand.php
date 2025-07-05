@@ -32,7 +32,7 @@ if ($brand_id > 0 && $brand_id <= $brand_count["COUNT(*)"]) {
         </div>";
 
     // Haal alle auto's van dit merk op
-    $stmt = $pdo->prepare("SELECT * FROM cars WHERE Brand = :brand_id ORDER BY times_submitted DESC");
+    $stmt = $pdo->prepare("SELECT * FROM cars WHERE Brand = :brand_id AND DeletedDate IS NULL ORDER BY times_submitted DESC");
     $stmt->bindParam(":brand_id", $brand_id);
     $stmt->execute();
     $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);

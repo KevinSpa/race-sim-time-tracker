@@ -14,7 +14,10 @@ $sortOptions = [
 $sort = isset($_GET['sort']) && isset($sortOptions[$_GET['sort']]) ? $_GET['sort'] : 'newest';
 $orderBy = $sortOptions[$sort]['sql'];
 
-$countTimes = $pdo->prepare("SELECT COUNT(*) AS TotalTimes FROM times");
+$countTimes = $pdo->prepare("SELECT COUNT(*) AS TotalTimes FROM times t
+                            JOIN cars c ON t.CarID = c.ID 
+                            JOIN tracks tr ON t.TrackID = tr.ID
+                            WHERE c.DeletedDate IS NULL AND tr.DeletedDate IS NULL");
 $countTimes->execute();
 $countResult = $countTimes->fetch(PDO::FETCH_ASSOC);
 $totalResults = $countResult['TotalTimes'];
@@ -71,6 +74,7 @@ if ($page >= 1 && $page <= $totalPages) {
                       FROM times t
                       INNER JOIN cars c ON t.CarID = c.ID
                       INNER JOIN tracks tr ON t.TrackID = tr.ID
+                      WHERE c.DeletedDate IS NULL AND tr.DeletedDate IS NULL
                       ORDER BY $orderBy
                       LIMIT $resultsPerPage OFFSET $offset");
     $stmt->execute();

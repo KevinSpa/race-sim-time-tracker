@@ -153,7 +153,6 @@ header h1 {
   box-shadow: 0px 0px 20px 0px var(--base-green);
 }
 
-
 form {
   margin: 20px;
   padding: 20px;
@@ -665,6 +664,11 @@ input[type=password] {
 .leaderboard-entry:hover {
   transform: scale(1.01);
   border: 1px solid var(--base-red);
+}
+
+.topspeed-link .leaderboard-entry:hover {
+  transform: none;
+  border: none;
 }
 
 .leaderboard-entry.first-place {
