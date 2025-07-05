@@ -70,7 +70,7 @@ function renderPagination($currentPage, $totalPages, $sort) {
 
 if ($page >= 1 && $page <= $totalPages) {
 
-    $stmt = $pdo->prepare("SELECT t.LapTime, t.SubmittedDate, c.Name AS CarName, c.Image AS CarImage, c.Brand, tr.Name AS TrackName, tr.Image AS TrackImage ,tr.Country
+    $stmt = $pdo->prepare("SELECT t.LapTime, t.SubmittedDate, t.CarID, t.TrackID, c.Name AS CarName, c.Image AS CarImage, c.Brand, tr.Name AS TrackName, tr.Image AS TrackImage ,tr.Country
                       FROM times t
                       INNER JOIN cars c ON t.CarID = c.ID
                       INNER JOIN tracks tr ON t.TrackID = tr.ID
@@ -111,6 +111,8 @@ if ($page >= 1 && $page <= $totalPages) {
         $trackName = $row["TrackName"];
         $country = $row["Country"];
         $date = $row["SubmittedDate"];
+        $carID = $row["CarID"];
+        $trackID = $row["TrackID"];
 
         echo "
         <div class='col-md-6 col-lg-4'>
@@ -120,10 +122,14 @@ if ($page >= 1 && $page <= $totalPages) {
                     <p class='card-subtitle mb-2'>Track: $trackName ($country)</p>
                     <div class='row mb-3'>
                         <div class='col-6'>
-                            <img src='uploads/cars/$carImage' class='img-fluid rounded'>
+                            <a href='cars?car=$carID' class='text-decoration-none'>
+                                <img src='uploads/cars/$carImage' class='img-fluid rounded card-hover' style='cursor: pointer;' alt='$carName' title='View $brandName $carName'>
+                            </a>
                         </div>
                         <div class='col-6'>
-                            <img src='uploads/tracks/$trackImage' class='img-fluid rounded'>
+                            <a href='tracks?track=$trackID' class='text-decoration-none'>
+                                <img src='uploads/tracks/$trackImage' class='img-fluid rounded card-hover' style='cursor: pointer;' alt='$trackName' title='View $trackName track'>
+                            </a>
                         </div>
                     </div>
                     <div class='d-flex justify-content-between'>
