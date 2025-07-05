@@ -52,3 +52,36 @@ function updateTrackImage() {
 const menuToggle = document.getElementById('menuToggle');
 const mainNav = document.getElementById('mainNav');
 let menuActive = false;
+
+// Mobile menu toggle functionality
+if (menuToggle && mainNav) {
+    menuToggle.addEventListener('click', function() {
+        if (menuActive) {
+            // Hide menu
+            mainNav.style.marginLeft = '-100%';
+            menuActive = false;
+        } else {
+            // Show menu
+            mainNav.style.marginLeft = '0';
+            menuActive = true;
+        }
+    });
+
+    // Close menu when clicking outside of it
+    document.addEventListener('click', function(event) {
+        if (menuActive && !mainNav.contains(event.target) && !menuToggle.contains(event.target)) {
+            mainNav.style.marginLeft = '-100%';
+            menuActive = false;
+        }
+    });
+
+    // Close menu when window is resized to desktop size
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 767) {
+            mainNav.style.marginLeft = '0';
+            menuActive = false;
+        } else if (!menuActive) {
+            mainNav.style.marginLeft = '-100%';
+        }
+    });
+}
