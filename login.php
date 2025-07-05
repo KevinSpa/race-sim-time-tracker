@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute(array(':username' => $postUser));
     $row = $stmt->fetch();
 
-    if (password_verify($postPass, $row['Password'])) {
+    // Check if user exists AND password is correct
+    if ($row && password_verify($postPass, $row['Password'])) {
         // password is correct, create session and redirect to main page
         $_SESSION['user_id'] = $row['ID'];
         header('Location: ./');
